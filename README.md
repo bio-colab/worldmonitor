@@ -62,35 +62,6 @@ Optional frontend-only mode (Vite):
 
 ```cmd
 npm run dev:vite
-## 🚀 Quick Start for Windows
-
-### 1. Prerequisites
-
-- **Node.js** (v18.x or 20.x)
-- **Vercel CLI**: `npm i -g vercel`
-
-### 2. Installation
-
-To avoid common Windows file-locking (EPERM) issues, use the optimized setup command:
-
-```cmd
-npm run setup:win
-```
-
-### 3. Environment Setup
-
-Copy the example environment file and fill in your keys:
-
-```cmd
-copy .env.example .env
-```
-
-### 4. Local Development
-
-Start the frontend and 60+ Edge functions locally:
-
-```cmd
-npm run dev
 ```
 
 ## 🛠 Project Structure

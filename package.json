@@ -62,8 +62,8 @@
     "install:pnpm": "pnpm install --frozen-lockfile",
     "dev:vite": "vite",
     "setup:win": "rmdir /s /q node_modules 2>nul && del package-lock.json 2>nul && npm install",
-    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q .vercel 2>nul & rmdir /s /q node_modules 2>nul"
-    "install:pnpm": "pnpm install --frozen-lockfile"
+    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q .vercel 2>nul & rmdir /s /q node_modules 2>nul",
+    "validate:package-json": "node -e \"JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')\""
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.66.0",
