@@ -316,6 +316,8 @@ vercel dev       # Runs frontend + all 60+ API edge functions
 
 Open [http://localhost:3000](http://localhost:3000)
 
+> **Install performance note**: root `npm install` no longer auto-installs optional nested apps (like `blog-site`) to keep setup fast and lightweight. Those dependencies are installed on-demand during `npm run build:blog` / `npm run build`. To force legacy behavior, set `WM_INSTALL_OPTIONAL_WORKSPACES=1` before install.
+
 > **Note**: `vercel dev` requires the [Vercel CLI](https://vercel.com/docs/cli) (`npm i -g vercel`). If you use `npm run dev` instead, only the frontend starts — news feeds and API-dependent panels won't load. See [Self-Hosting](#self-hosting) for details.
 
 ### Environment Variables (Optional)
