@@ -55,7 +55,15 @@
     "desktop:package:macos:tech:sign": "node scripts/desktop-package.mjs --os macos --variant tech --sign",
     "desktop:package:windows:full:sign": "node scripts/desktop-package.mjs --os windows --variant full --sign",
     "desktop:package:windows:tech:sign": "node scripts/desktop-package.mjs --os windows --variant tech --sign",
-    "desktop:package": "node scripts/desktop-package.mjs"
+    "desktop:package": "node scripts/desktop-package.mjs",
+    "dev:vercel": "vercel dev --listen 3000",
+    "dev:vercel:4173": "vercel dev --listen 4173",
+    "dev:vercel:mem": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vercel dev --listen 3000",
+    "install:pnpm": "pnpm install --frozen-lockfile",
+    "dev:vite": "vite",
+    "setup:win": "rmdir /s /q node_modules 2>nul && del package-lock.json 2>nul && npm install",
+    "clean": "rmdir /s /q dist 2>nul & rmdir /s /q .vercel 2>nul & rmdir /s /q node_modules 2>nul",
+    "validate:package-json": "node -e \"JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')\""
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.66.0",
@@ -118,5 +126,13 @@
   "overrides": {
     "fast-xml-parser": "^5.3.7",
     "serialize-javascript": "^7.0.4"
+  },
+  "author": "Bio-Colab Community",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bio-colab/worldmonitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bio-colab/worldmonitor/issues"
   }
 }
