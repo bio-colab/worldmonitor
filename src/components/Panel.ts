@@ -621,21 +621,42 @@ export class Panel {
   }
 
 
-  protected setDataBadge(state: 'live' | 'cached' | 'unavailable', detail?: string): void {
+  protected setDataBadge(state: 'live' | 'cached' | 'unavailable' | 'stale' | 'fallback', detail?: string, onRetry?: () => void): void {
     if (!this.statusBadgeEl) return;
     const labels = {
       live: t('common.live'),
       cached: t('common.cached'),
       unavailable: t('common.unavailable'),
+      stale: t('common.cached'),
+      fallback: t('common.cached'),
     } as const;
-    this.statusBadgeEl.textContent = detail ? `${labels[state]} · ${detail}` : labels[state];
+    const warn = state === 'cached' || state === 'stale' || state === 'fallback';
+    const text = detail ? `${labels[state]} · ${detail}` : labels[state];
+    this.statusBadgeEl.textContent = warn ? `⚠ ${text}` : text;
     this.statusBadgeEl.className = `panel-data-badge ${state}`;
+
+    const existingRetry = this.header.querySelector<HTMLButtonElement>('.panel-stale-retry-btn');
+    if (existingRetry) existingRetry.remove();
+    if (warn && onRetry) {
+      const retryBtn = h('button', {
+        className: 'panel-stale-retry-btn',
+        type: 'button',
+        'aria-label': t('common.retry'),
+        title: t('common.retry'),
+      }, '↻');
+      retryBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onRetry();
+      });
+      this.header.appendChild(retryBtn);
+    }
     this.statusBadgeEl.style.display = 'inline-flex';
   }
 
   protected clearDataBadge(): void {
     if (!this.statusBadgeEl) return;
     this.statusBadgeEl.style.display = 'none';
+    this.header.querySelector('.panel-stale-retry-btn')?.remove();
   }
 
   protected insertLiveCountBadge(count: number): void {
@@ -673,7 +694,7 @@ export class Panel {
     this.clearRetryCountdown();
     replaceChildren(this.content,
       h('div', { className: 'panel-loading' },
-        h('div', { className: 'panel-loading-radar' },
+        h('div', { className: 'panel-loading-radar u-skeleton-block' },
           h('div', { className: 'panel-radar-sweep' }),
           h('div', { className: 'panel-radar-dot' }),
         ),

@@ -60,7 +60,7 @@ async function sendConfirmationEmail(email, referralCode) {
         'Authorization': `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: 'World Monitor <noreply@worldmonitor.app>',
+        from: `World Monitor <${process.env.CONTACT_EMAIL || 'noreply@worldmonitor.app'}>`,
         to: [email],
         subject: 'You\u2019re on the World Monitor Pro waitlist',
         html: `
@@ -168,7 +168,7 @@ async function sendConfirmationEmail(email, referralCode) {
             </div>
             <div style="border-top: 1px solid #1a1a1a; padding: 24px 32px; text-align: center;">
               <div style="margin-bottom: 16px;">
-                <a href="https://x.com/eliehabib" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">X / Twitter</a>
+                <a href="https://github.com/bio-colab" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">Bio-Colab</a>
                 <a href="https://github.com/koala73/worldmonitor" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">GitHub</a>
                 <a href="https://worldmonitor.app/pro" style="color: #666; text-decoration: none; font-size: 12px; margin: 0 12px;">Pro Waitlist</a>
               </div>
