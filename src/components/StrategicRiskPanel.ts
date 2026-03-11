@@ -141,7 +141,7 @@ export class StrategicRiskPanel extends Panel {
     if (!this.freshnessSummary || this.freshnessSummary.activeSources === 0) {
       this.setDataBadge('unavailable');
     } else if (this.usedCachedScores) {
-      this.setDataBadge('cached');
+      this.setDataBadge('cached', undefined, () => void this.refresh());
     } else {
       this.setDataBadge('live');
     }
