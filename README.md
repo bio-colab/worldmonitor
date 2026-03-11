@@ -55,13 +55,13 @@ copy .env.example .env
 Start frontend + edge functions locally:
 
 ```cmd
-npm run dev
+npm run dev:vercel
 ```
 
-Optional frontend-only mode (Vite):
+Frontend-only mode (Vite):
 
 ```cmd
-npm run dev:vite
+npm run dev
 ```
 
 ## 🛠 Project Structure
