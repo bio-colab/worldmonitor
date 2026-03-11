@@ -55,7 +55,11 @@
     "desktop:package:macos:tech:sign": "node scripts/desktop-package.mjs --os macos --variant tech --sign",
     "desktop:package:windows:full:sign": "node scripts/desktop-package.mjs --os windows --variant full --sign",
     "desktop:package:windows:tech:sign": "node scripts/desktop-package.mjs --os windows --variant tech --sign",
-    "desktop:package": "node scripts/desktop-package.mjs"
+    "desktop:package": "node scripts/desktop-package.mjs",
+    "dev:vercel": "vercel dev --listen 3000",
+    "dev:vercel:4173": "vercel dev --listen 4173",
+    "dev:vercel:mem": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vercel dev --listen 3000",
+    "install:pnpm": "pnpm install --frozen-lockfile"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.66.0",
