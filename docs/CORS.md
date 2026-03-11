@@ -20,7 +20,7 @@ Both files use the same regex patterns:
 | Pattern | Matches |
 | --- | --- |
 | `(*.)?worldmonitor.app` | Production + subdomains (`tech.`, `finance.`, etc.) |
-| `worldmonitor-*-elie-*.vercel.app` | Vercel preview deploys |
+| `worldmonitor-*-*.vercel.app` | Vercel preview deploys |
 | `localhost:*` / `127.0.0.1:*` | Local development |
 | `tauri.localhost:*` / `*.tauri.localhost:*` | Desktop app (Tauri v2) |
 | `tauri://localhost` / `asset://localhost` | Desktop app (Tauri v1 / asset protocol) |

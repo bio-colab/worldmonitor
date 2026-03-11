@@ -64,6 +64,37 @@ export interface IntelligenceCache {
   imageryScenes?: Array<{ id: string; satellite: string; datetime: string; resolutionM: number; mode: string; geometryGeojson: string; previewUrl: string; assetUrl: string }>;
 }
 
+
+export interface UiStateStore {
+  isDestroyed: boolean;
+  isPlaybackMode: boolean;
+  isIdle: boolean;
+  initialLoadComplete: boolean;
+  resolvedLocation: 'global' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
+}
+
+export interface DataStateStore {
+  allNews: NewsItem[];
+  newsByCategory: Record<string, NewsItem[]>;
+  latestMarkets: MarketData[];
+  latestPredictions: PredictionMarket[];
+  latestClusters: ClusteredEvent[];
+  monitors: Monitor[];
+  happyAllItems: NewsItem[];
+}
+
+export interface CacheStateStore {
+  intelligenceCache: IntelligenceCache;
+  cyberThreatsCache: CyberThreat[] | null;
+  inFlight: Set<string>;
+  seenGeoAlerts: Set<string>;
+}
+
+export interface MapStateStore {
+  mapLayers: MapLayers;
+  currentTimeRange: TimeRange;
+}
+
 export interface AppModule {
   init(): void | Promise<void>;
   destroy(): void;
@@ -80,6 +111,12 @@ export interface AppContext {
   panelSettings: Record<string, PanelConfig>;
 
   mapLayers: MapLayers;
+
+  // New composition-friendly stores (legacy flat fields remain for backward compatibility)
+  uiState: UiStateStore;
+  dataState: DataStateStore;
+  cacheState: CacheStateStore;
+  mapState: MapStateStore;
 
   allNews: NewsItem[];
   newsByCategory: Record<string, NewsItem[]>;
