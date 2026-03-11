@@ -63,6 +63,7 @@ export class App {
 
   private modules: { destroy(): void }[] = [];
   private unsubAiFlow: (() => void) | null = null;
+  private visibilityCleanupHandler: (() => void) | null = null;
 
   constructor(containerId: string) {
     const el = document.getElementById(containerId);
@@ -247,6 +248,33 @@ export class App {
 
     const disabledSources = new Set(loadFromStorage<string[]>(STORAGE_KEYS.disabledFeeds, []));
 
+    const uiState: AppContext['uiState'] = {
+      isDestroyed: false,
+      isPlaybackMode: false,
+      isIdle: false,
+      initialLoadComplete: false,
+      resolvedLocation: 'global',
+    };
+    const dataState: AppContext['dataState'] = {
+      allNews: [] as AppContext['allNews'],
+      newsByCategory: {} as AppContext['newsByCategory'],
+      latestMarkets: [] as AppContext['latestMarkets'],
+      latestPredictions: [] as AppContext['latestPredictions'],
+      latestClusters: [] as AppContext['latestClusters'],
+      monitors,
+      happyAllItems: [] as AppContext['happyAllItems'],
+    };
+    const cacheState: AppContext['cacheState'] = {
+      intelligenceCache: {} as AppContext['intelligenceCache'],
+      cyberThreatsCache: null as AppContext['cyberThreatsCache'],
+      inFlight: new Set<string>(),
+      seenGeoAlerts: new Set<string>(),
+    };
+    const mapState: AppContext['mapState'] = {
+      mapLayers,
+      currentTimeRange: '7d',
+    };
+
     // Build shared state object
     this.state = {
       map: null,
@@ -256,19 +284,24 @@ export class App {
       panels: {},
       newsPanels: {},
       panelSettings,
-      mapLayers,
-      allNews: [],
-      newsByCategory: {},
-      latestMarkets: [],
-      latestPredictions: [],
-      latestClusters: [],
-      intelligenceCache: {},
-      cyberThreatsCache: null,
+      mapLayers: mapState.mapLayers,
+      uiState,
+      dataState,
+      cacheState,
+      mapState,
+      // Backward-compatible facade fields
+      allNews: dataState.allNews,
+      newsByCategory: dataState.newsByCategory,
+      latestMarkets: dataState.latestMarkets,
+      latestPredictions: dataState.latestPredictions,
+      latestClusters: dataState.latestClusters,
+      intelligenceCache: cacheState.intelligenceCache,
+      cyberThreatsCache: cacheState.cyberThreatsCache,
       disabledSources,
-      currentTimeRange: '7d',
-      inFlight: new Set(),
-      seenGeoAlerts: new Set(),
-      monitors,
+      currentTimeRange: mapState.currentTimeRange,
+      inFlight: cacheState.inFlight,
+      seenGeoAlerts: cacheState.seenGeoAlerts,
+      monitors: dataState.monitors,
       signalModal: null,
       statusPanel: null,
       searchModal: null,
@@ -289,12 +322,12 @@ export class App {
       speciesPanel: null,
       renewablePanel: null,
       tvMode: null,
-      happyAllItems: [],
-      isDestroyed: false,
-      isPlaybackMode: false,
-      isIdle: false,
-      initialLoadComplete: false,
-      resolvedLocation: 'global',
+      happyAllItems: dataState.happyAllItems,
+      isDestroyed: uiState.isDestroyed,
+      isPlaybackMode: uiState.isPlaybackMode,
+      isIdle: uiState.isIdle,
+      initialLoadComplete: uiState.initialLoadComplete,
+      resolvedLocation: uiState.resolvedLocation,
       initialUrlState,
       PANEL_ORDER_KEY,
       PANEL_SPANS_KEY,
@@ -407,6 +440,7 @@ export class App {
 
     // Hydrate in-memory cache from bootstrap endpoint (before panels construct and fetch)
     await fetchBootstrapData();
+    this.setupVisibilityCacheCleanup();
 
     const geoCoordsPromise: Promise<PreciseCoordinates | null> =
       this.state.isMobile && this.state.initialUrlState?.lat === undefined && this.state.initialUrlState?.lon === undefined
@@ -521,6 +555,7 @@ export class App {
 
   public destroy(): void {
     this.state.isDestroyed = true;
+    this.state.uiState.isDestroyed = true;
 
     // Destroy all modules in reverse order
     for (let i = this.modules.length - 1; i >= 0; i--) {
@@ -528,11 +563,33 @@ export class App {
     }
 
     // Clean up subscriptions, map, AIS, and breaking news
+    if (this.visibilityCleanupHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityCleanupHandler);
+      this.visibilityCleanupHandler = null;
+    }
     this.unsubAiFlow?.();
     this.state.breakingBanner?.destroy();
     destroyBreakingNewsAlerts();
     this.state.map?.destroy();
     disconnectAisStream();
+  }
+
+
+  private setupVisibilityCacheCleanup(): void {
+    if (this.visibilityCleanupHandler) return;
+    this.visibilityCleanupHandler = () => {
+      if (document.visibilityState !== 'hidden') return;
+
+      // Keep UI state, but drop heavyweight transient caches to reduce memory pressure.
+      this.state.cacheState.cyberThreatsCache = null;
+      this.state.cyberThreatsCache = null;
+      this.state.cacheState.intelligenceCache = {};
+      this.state.intelligenceCache = this.state.cacheState.intelligenceCache;
+
+      // Also clear consumed bootstrap leftovers when tab is backgrounded.
+      window.dispatchEvent(new CustomEvent('wm:cache-trim'));
+    };
+    document.addEventListener('visibilitychange', this.visibilityCleanupHandler);
   }
 
   private handleDeepLinks(): void {

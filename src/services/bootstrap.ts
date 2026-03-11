@@ -1,15 +1,17 @@
-const hydrationCache = new Map<string, unknown>();
+const hydrationCache = new Map<string, { value: unknown; ts: number }>();
+const CACHE_ENTRY_TTL_MS = 10 * 60 * 1000;
 
 export function getHydratedData(key: string): unknown | undefined {
-  const val = hydrationCache.get(key);
-  if (val !== undefined) hydrationCache.delete(key);
-  return val;
+  const entry = hydrationCache.get(key);
+  if (!entry) return undefined;
+  hydrationCache.delete(key);
+  return entry.value;
 }
 
 function populateCache(data: Record<string, unknown>): void {
   for (const [k, v] of Object.entries(data)) {
     if (v !== null && v !== undefined) {
-      hydrationCache.set(k, v);
+      hydrationCache.set(k, { value: v, ts: Date.now() });
     }
   }
 }
@@ -34,6 +36,7 @@ export async function fetchBootstrapData(): Promise<void> {
   const fastTimeout = setTimeout(() => fastCtrl.abort(), 3_000);
   const slowTimeout = setTimeout(() => slowCtrl.abort(), 5_000);
   try {
+    trimHydrationCache();
     await Promise.all([
       fetchTier('slow', slowCtrl.signal),
       fetchTier('fast', fastCtrl.signal),
@@ -43,3 +46,14 @@ export async function fetchBootstrapData(): Promise<void> {
     clearTimeout(slowTimeout);
   }
 }
+
+function trimHydrationCache(): void {
+  const now = Date.now();
+  for (const [key, entry] of hydrationCache.entries()) {
+    if (now - entry.ts > CACHE_ENTRY_TTL_MS) hydrationCache.delete(key);
+  }
+}
+
+window.addEventListener('wm:cache-trim', () => {
+  hydrationCache.clear();
+});
